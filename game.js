@@ -31,10 +31,18 @@ const LEVELS = [
       { id: "chick", name: "Chick", emoji: "🐤" }
     ],
     patterns: [
-      { label: "Major 2 (D-E)", notes: [293.66, 329.63], mode: "sequence" },
+      { label: "Minor 2 (C-Db)", notes: [261.63, 277.18], mode: "sequence" },
+      { label: "Major 2 (C-D)", notes: [261.63, 293.66], mode: "sequence" },
+      { label: "Minor 3 (C-Eb)", notes: [261.63, 311.13], mode: "sequence" },
       { label: "Major 3 (C-E)", notes: [261.63, 329.63], mode: "sequence" },
+      { label: "Perfect 4 (C-F)", notes: [261.63, 349.23], mode: "sequence" },
+      { label: "Tritone (C-F#)", notes: [261.63, 369.99], mode: "sequence" },
       { label: "Perfect 5 (C-G)", notes: [261.63, 392.0], mode: "sequence" },
-      { label: "Minor 3 (D-F)", notes: [293.66, 349.23], mode: "sequence" }
+      { label: "Minor 6 (C-Ab)", notes: [261.63, 415.3], mode: "sequence" },
+      { label: "Major 6 (C-A)", notes: [261.63, 440.0], mode: "sequence" },
+      { label: "Minor 7 (C-Bb)", notes: [261.63, 466.16], mode: "sequence" },
+      { label: "Major 7 (C-B)", notes: [261.63, 493.88], mode: "sequence" },
+      { label: "Octave (C-C)", notes: [261.63, 523.25], mode: "sequence" }
     ]
   },
   {
@@ -63,10 +71,18 @@ const LEVELS = [
       { id: "deer", name: "Deer", emoji: "🦌" }
     ],
     patterns: [
-      { label: "Octave Up (A-A)", notes: [220.0, 440.0], mode: "sequence" },
-      { label: "Minor 9 (B-C)", notes: [246.94, 523.25], mode: "sequence" },
-      { label: "Octave Down (C-C)", notes: [523.25, 261.63], mode: "sequence" },
-      { label: "Major 10 (G-B)", notes: [196.0, 493.88], mode: "sequence" }
+      { label: "Minor 9 (C-Db)", notes: [130.81, 277.18], mode: "sequence" },
+      { label: "Major 9 (C-D)", notes: [130.81, 293.66], mode: "sequence" },
+      { label: "Minor 10 (C-Eb)", notes: [130.81, 311.13], mode: "sequence" },
+      { label: "Major 10 (C-E)", notes: [130.81, 329.63], mode: "sequence" },
+      { label: "Perfect 11 (C-F)", notes: [130.81, 349.23], mode: "sequence" },
+      { label: "Augmented 11 (C-F#)", notes: [130.81, 369.99], mode: "sequence" },
+      { label: "Perfect 12 (C-G)", notes: [130.81, 392.0], mode: "sequence" },
+      { label: "Minor 13 (C-Ab)", notes: [130.81, 415.3], mode: "sequence" },
+      { label: "Major 13 (C-A)", notes: [130.81, 440.0], mode: "sequence" },
+      { label: "Minor 14 (C-Bb)", notes: [130.81, 466.16], mode: "sequence" },
+      { label: "Major 14 (C-B)", notes: [130.81, 493.88], mode: "sequence" },
+      { label: "Double Octave (C-C)", notes: [130.81, 523.25], mode: "sequence" }
     ]
   },
   {
