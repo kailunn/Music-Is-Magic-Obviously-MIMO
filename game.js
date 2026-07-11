@@ -1,4 +1,5 @@
 const TOTAL_ROUNDS = 20;
+const LEADERBOARD_KEY = "melodyHuntersScores";
 
 const LEVELS = [
   {
@@ -92,6 +93,7 @@ const els = {
   endScreen: document.querySelector("#endScreen"),
   playerName: document.querySelector("#playerName"),
   startButton: document.querySelector("#startButton"),
+  startLeaderboardButton: document.querySelector("#startLeaderboardButton"),
   soundToggle: document.querySelector("#soundToggle"),
   levelTitle: document.querySelector("#levelTitle"),
   roundStat: document.querySelector("#roundStat"),
@@ -135,6 +137,9 @@ let state = {
   captured: [],
   patternBags: {},
   lastPatternByLevel: {},
+  startedAt: 0,
+  runSessionPromise: null,
+  scoreSavePromise: null,
   question: null
 };
 
@@ -153,6 +158,91 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function getOnlineConfig() {
+  const config = window.MIMO_ONLINE || {};
+  const supabaseUrl = String(config.supabaseUrl || "").replace(/\/$/, "");
+  const supabaseAnonKey = String(config.supabaseAnonKey || "");
+  const edgeFunctionBaseUrl = String(config.edgeFunctionBaseUrl || "").replace(/\/$/, "");
+  const edgeFunctionName = String(config.edgeFunctionName || "");
+  const table = String(config.table || "mimo_scores");
+  const hasPlaceholder = supabaseUrl.includes("YOUR_PROJECT_ID") || supabaseAnonKey.includes("YOUR_SUPABASE");
+  if (config.provider !== "supabase" || !supabaseUrl || !supabaseAnonKey || hasPlaceholder) return null;
+  return { supabaseUrl, supabaseAnonKey, edgeFunctionBaseUrl, edgeFunctionName, table };
+}
+
+function normalizeOnlineRecord(record) {
+  return {
+    player: record.name || record.player || "Hunter",
+    score: Number(record.score || 0),
+    bestLevel: Number(record.best_level || record.bestLevel || 1),
+    accuracy: Number(record.accuracy || 0),
+    monstersCaptured: Number(record.monsters_captured || record.monstersCaptured || 0),
+    seconds: Number(record.seconds || 0),
+    date: record.created_at || record.date || ""
+  };
+}
+
+function sortScores(scores) {
+  return [...scores].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (b.bestLevel !== a.bestLevel) return b.bestLevel - a.bestLevel;
+    if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+    return (a.seconds || 0) - (b.seconds || 0);
+  });
+}
+
+async function fetchOnlineLeaderboard() {
+  const config = getOnlineConfig();
+  if (!config) return null;
+  const params = "select=name,score,best_level,accuracy,monsters_captured,seconds,created_at&order=score.desc,best_level.desc,accuracy.desc,seconds.asc&limit=10";
+  const response = await fetch(`${config.supabaseUrl}/rest/v1/${config.table}?${params}`, {
+    headers: {
+      apikey: config.supabaseAnonKey,
+      Authorization: `Bearer ${config.supabaseAnonKey}`
+    }
+  });
+  if (!response.ok) throw new Error(`Leaderboard fetch failed: ${response.status}`);
+  return (await response.json()).map(normalizeOnlineRecord);
+}
+
+async function createRemoteRunSession(playerName) {
+  const config = getOnlineConfig();
+  if (!config?.edgeFunctionBaseUrl || !config?.edgeFunctionName) return null;
+  const response = await fetch(`${config.edgeFunctionBaseUrl}/${config.edgeFunctionName}?action=start`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: config.supabaseAnonKey,
+      Authorization: `Bearer ${config.supabaseAnonKey}`
+    },
+    body: JSON.stringify({ playerName })
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Run session request failed: ${response.status} ${message}`.trim());
+  }
+  return response.json();
+}
+
+async function submitRemoteRecord(record, token) {
+  const config = getOnlineConfig();
+  if (!config?.edgeFunctionBaseUrl || !config?.edgeFunctionName) return false;
+  const response = await fetch(`${config.edgeFunctionBaseUrl}/${config.edgeFunctionName}?action=submit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: config.supabaseAnonKey,
+      Authorization: `Bearer ${config.supabaseAnonKey}`
+    },
+    body: JSON.stringify({ ...record, token })
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Leaderboard submit failed: ${response.status} ${message}`.trim());
+  }
+  return true;
 }
 
 function splitAnswerLabel(label) {
@@ -456,8 +546,18 @@ function startGame() {
     captured: [],
     patternBags: createPatternBags(),
     lastPatternByLevel: {},
+    startedAt: performance.now(),
+    runSessionPromise: null,
+    scoreSavePromise: null,
     question: null
   };
+  const config = getOnlineConfig();
+  if (config?.edgeFunctionBaseUrl && config?.edgeFunctionName) {
+    state.runSessionPromise = createRemoteRunSession(state.player).catch((error) => {
+      console.warn(error);
+      return null;
+    });
+  }
   ensureAudio();
   startBackgroundMusic();
   buildQuestion();
@@ -478,7 +578,14 @@ function finishGame() {
   els.collection.innerHTML = state.captured.length
     ? state.captured.map((monster) => `<span class="team-chip">${monster.emoji} ${monster.name}</span>`).join("")
     : `<span class="team-chip">No captures this time</span>`;
-  saveScore({ player: state.player, score: state.score, bestLevel: state.bestLevel, accuracy });
+  state.scoreSavePromise = saveScore({
+    player: state.player,
+    score: state.score,
+    bestLevel: state.bestLevel,
+    accuracy,
+    monstersCaptured: state.captured.length,
+    seconds: Math.max(1, Math.round((performance.now() - state.startedAt) / 1000))
+  });
 }
 
 function showScreen(name) {
@@ -487,30 +594,62 @@ function showScreen(name) {
   els.endScreen.classList.toggle("hidden", name !== "end");
 }
 
-function saveScore(entry) {
+async function saveScore(entry) {
+  const record = { ...entry, date: new Date().toISOString() };
+  try {
+    const config = getOnlineConfig();
+    if (config?.edgeFunctionBaseUrl && config?.edgeFunctionName) {
+      const session = await state.runSessionPromise;
+      if (session?.token) {
+        await submitRemoteRecord(record, session.token);
+        return;
+      }
+    }
+  } catch (error) {
+    console.warn(error);
+  }
+
   const scores = getScores();
-  scores.push({ ...entry, date: new Date().toISOString() });
-  scores.sort((a, b) => b.score - a.score || b.accuracy - a.accuracy);
-  localStorage.setItem("melodyHuntersScores", JSON.stringify(scores.slice(0, 10)));
+  scores.push(record);
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(sortScores(scores).slice(0, 10)));
 }
 
 function getScores() {
   try {
-    return JSON.parse(localStorage.getItem("melodyHuntersScores") || "[]");
+    const scores = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
+    return Array.isArray(scores) ? scores : [];
   } catch {
     return [];
   }
 }
 
-function showLeaderboard() {
-  const scores = getScores();
-  els.leaderboardList.innerHTML = scores.length
-    ? scores.map((entry) => `<li>${escapeHtml(entry.player)}<span>${entry.score} pts · L${entry.bestLevel}</span></li>`).join("")
-    : "<li>No scores yet<span>Play a run</span></li>";
+async function showLeaderboard() {
+  els.leaderboardList.innerHTML = "<li>Syncing<span>Loading</span></li>";
   els.leaderboardDialog.showModal();
+  if (state.scoreSavePromise) {
+    await state.scoreSavePromise.catch((error) => console.warn(error));
+  }
+
+  let scores = sortScores(getScores()).slice(0, 10);
+  let source = "Local";
+  if (getOnlineConfig()) {
+    try {
+      scores = sortScores(await fetchOnlineLeaderboard()).slice(0, 10);
+      source = "Online";
+    } catch (error) {
+      console.warn(error);
+      source = "Local fallback";
+    }
+  }
+
+  els.leaderboardList.innerHTML = scores.length
+    ? scores.map((entry) => `<li>${escapeHtml(entry.player)}<span>${entry.score} pts · L${entry.bestLevel} · ${entry.accuracy}%</span></li>`).join("")
+    : "<li>No scores yet<span>Play a run</span></li>";
+  els.leaderboardList.insertAdjacentHTML("afterbegin", `<li class="leaderboard-source">${source}<span>${scores.length ? "Top 10" : ""}</span></li>`);
 }
 
 els.startButton.addEventListener("click", startGame);
+els.startLeaderboardButton.addEventListener("click", showLeaderboard);
 els.againButton.addEventListener("click", startGame);
 els.replayButton.addEventListener("click", () => {
   if (state.question) playPattern(state.question.answerPattern);
