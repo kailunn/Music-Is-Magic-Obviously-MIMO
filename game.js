@@ -63,7 +63,7 @@ const LEVELS = [
     ],
     patterns: [
       { label: "Octave Up (A-A)", notes: [220.0, 440.0], mode: "sequence" },
-      { label: "Major 9 (B-C)", notes: [246.94, 523.25], mode: "sequence" },
+      { label: "Minor 9 (B-C)", notes: [246.94, 523.25], mode: "sequence" },
       { label: "Octave Down (C-C)", notes: [523.25, 261.63], mode: "sequence" },
       { label: "Major 10 (G-B)", notes: [196.0, 493.88], mode: "sequence" }
     ]
