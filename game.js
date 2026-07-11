@@ -50,9 +50,17 @@ const LEVELS = [
     ],
     patterns: [
       { label: "C Major (C-E-G)", notes: [261.63, 329.63, 392.0], mode: "chord" },
-      { label: "F Major (F-A-C)", notes: [174.61, 220.0, 261.63], mode: "chord" },
+      { label: "Db Major (Db-F-Ab)", notes: [277.18, 349.23, 415.3], mode: "chord" },
+      { label: "D Major (D-F#-A)", notes: [293.66, 369.99, 440.0], mode: "chord" },
+      { label: "Eb Major (Eb-G-Bb)", notes: [311.13, 392.0, 466.16], mode: "chord" },
+      { label: "E Major (E-G#-B)", notes: [329.63, 415.3, 493.88], mode: "chord" },
+      { label: "F Major (F-A-C)", notes: [349.23, 440.0, 523.25], mode: "chord" },
+      { label: "F# Major (F#-A#-C#)", notes: [369.99, 466.16, 554.37], mode: "chord" },
       { label: "G Major (G-B-D)", notes: [196.0, 246.94, 293.66], mode: "chord" },
-      { label: "C Major High (C-E-G)", notes: [523.25, 659.25, 783.99], mode: "chord" }
+      { label: "Ab Major (Ab-C-Eb)", notes: [415.3, 523.25, 622.25], mode: "chord" },
+      { label: "A Major (A-C#-E)", notes: [440.0, 554.37, 659.25], mode: "chord" },
+      { label: "Bb Major (Bb-D-F)", notes: [466.16, 587.33, 698.46], mode: "chord" },
+      { label: "B Major (B-D#-F#)", notes: [493.88, 622.25, 739.99], mode: "chord" }
     ]
   },
   {
