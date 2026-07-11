@@ -514,7 +514,12 @@ function buildQuestion() {
   const level = getLevel();
   const answerPattern = drawPatternForLevel(level);
   const optionCount = level.id === 1 ? 7 : Math.min(4, level.patterns.length);
-  const decoys = shuffle(level.patterns.filter((pattern) => pattern.label !== answerPattern.label)).slice(0, optionCount - 1);
+  const matchingLengthDecoys = level.patterns.filter((pattern) =>
+    pattern.label !== answerPattern.label && pattern.notes.length === answerPattern.notes.length
+  );
+  const fallbackDecoys = level.patterns.filter((pattern) => pattern.label !== answerPattern.label);
+  const decoyPool = matchingLengthDecoys.length >= optionCount - 1 ? matchingLengthDecoys : fallbackDecoys;
+  const decoys = shuffle(decoyPool).slice(0, optionCount - 1);
   const options = shuffle([answerPattern, ...decoys]).map((pattern) => ({
     pattern,
     isCorrect: pattern.label === answerPattern.label
