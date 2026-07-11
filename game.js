@@ -708,7 +708,7 @@ async function showLeaderboard() {
 
 async function shareScore() {
   const gameUrl = `${window.location.origin}${window.location.pathname}`;
-  const text = `${state.player} scored ${state.score} points in Melody Hunters. Can you beat it?\n${gameUrl}`;
+  const text = `I scored ${state.score} points in Melody Hunters! 🎵✨ Can you beat my score?\nHunter: ${state.player}\n${gameUrl}`;
 
   try {
     await navigator.clipboard.writeText(text);
