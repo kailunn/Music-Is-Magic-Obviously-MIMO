@@ -20,6 +20,8 @@ const allowedOrigins = new Set([
   "http://[::1]:5173",
 ]);
 
+const STORED_LEADERBOARD_LIMIT = 1000;
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -78,6 +80,23 @@ function clampInt(value: unknown, min: number, max: number) {
   const n = Number(value);
   if (!Number.isFinite(n)) return null;
   return Math.max(min, Math.min(max, Math.trunc(n)));
+}
+
+function isBetterScore(candidate: {
+  score: number;
+  bestLevel: number;
+  accuracy: number;
+  seconds: number;
+}, existing: {
+  score: number;
+  best_level: number;
+  accuracy: number;
+  seconds: number;
+}) {
+  if (candidate.score !== existing.score) return candidate.score > existing.score;
+  if (candidate.bestLevel !== existing.best_level) return candidate.bestLevel > existing.best_level;
+  if (candidate.accuracy !== existing.accuracy) return candidate.accuracy > existing.accuracy;
+  return candidate.seconds < existing.seconds;
 }
 
 function getSecret(name: string) {
@@ -171,6 +190,37 @@ export default {
 
         if (serverSeconds < 10) return json(400, { error: "Run too short" });
 
+        const { count: scoreCount, error: countError } = await supabase
+          .from("mimo_scores")
+          .select("id", { count: "exact", head: true });
+        if (countError) return json(400, { error: countError.message });
+
+        if ((scoreCount || 0) >= STORED_LEADERBOARD_LIMIT) {
+          const { data: cutoffRows, error: cutoffError } = await supabase
+            .from("mimo_scores")
+            .select("score,best_level,accuracy,seconds")
+            .order("score", { ascending: false })
+            .order("best_level", { ascending: false })
+            .order("accuracy", { ascending: false })
+            .order("seconds", { ascending: true })
+            .order("created_at", { ascending: true })
+            .range(STORED_LEADERBOARD_LIMIT - 1, STORED_LEADERBOARD_LIMIT - 1);
+          if (cutoffError) return json(400, { error: cutoffError.message });
+          const cutoff = cutoffRows?.[0];
+          if (cutoff && !isBetterScore({ score, bestLevel, accuracy, seconds: serverSeconds }, cutoff)) {
+            const { data: claimedSession, error: claimError } = await supabase
+              .from("mimo_sessions")
+              .update({ used_at: new Date().toISOString() })
+              .eq("run_id", runId)
+              .is("used_at", null)
+              .select("run_id")
+              .maybeSingle();
+            if (claimError) return json(400, { error: claimError.message });
+            if (!claimedSession) return json(409, { error: "Session already used" });
+            return json(200, { ok: true, ranked: false });
+          }
+        }
+
         const { data: claimedSession, error: claimError } = await supabase
           .from("mimo_sessions")
           .update({ used_at: new Date().toISOString() })
@@ -192,7 +242,24 @@ export default {
         });
 
         if (error) return json(400, { error: error.message });
-        return json(200, { ok: true });
+
+        const { data: overflowRows, error: overflowError } = await supabase
+          .from("mimo_scores")
+          .select("id")
+          .order("score", { ascending: false })
+          .order("best_level", { ascending: false })
+          .order("accuracy", { ascending: false })
+          .order("seconds", { ascending: true })
+          .order("created_at", { ascending: true })
+          .range(STORED_LEADERBOARD_LIMIT, STORED_LEADERBOARD_LIMIT + 200);
+        if (overflowError) return json(400, { error: overflowError.message });
+        const overflowIds = (overflowRows || []).map((row) => row.id);
+        if (overflowIds.length) {
+          const { error: deleteError } = await supabase.from("mimo_scores").delete().in("id", overflowIds);
+          if (deleteError) return json(400, { error: deleteError.message });
+        }
+
+        return json(200, { ok: true, ranked: true });
       }
 
       return json(404, { error: "Not found" });

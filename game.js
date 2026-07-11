@@ -1,5 +1,6 @@
 const TOTAL_ROUNDS = 20;
 const LEADERBOARD_KEY = "melodyHuntersScores";
+const LEADERBOARD_DISPLAY_LIMIT = 100;
 
 const LEVELS = [
   {
@@ -293,7 +294,7 @@ function sortScores(scores) {
 async function fetchOnlineLeaderboard() {
   const config = getOnlineConfig();
   if (!config) return null;
-  const params = "select=name,score,best_level,accuracy,monsters_captured,seconds,created_at&order=score.desc,best_level.desc,accuracy.desc,seconds.asc&limit=10";
+  const params = `select=name,score,best_level,accuracy,monsters_captured,seconds,created_at&order=score.desc,best_level.desc,accuracy.desc,seconds.asc&limit=${LEADERBOARD_DISPLAY_LIMIT}`;
   const response = await fetch(`${config.supabaseUrl}/rest/v1/${config.table}?${params}`, {
     headers: {
       apikey: config.supabaseAnonKey,
@@ -708,7 +709,7 @@ async function saveScore(entry) {
 
   const scores = getScores();
   scores.push(record);
-  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(sortScores(scores).slice(0, 10)));
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(sortScores(scores).slice(0, LEADERBOARD_DISPLAY_LIMIT)));
 }
 
 function getScores() {
@@ -727,11 +728,11 @@ async function showLeaderboard() {
     await state.scoreSavePromise.catch((error) => console.warn(error));
   }
 
-  let scores = sortScores(getScores()).slice(0, 10);
+  let scores = sortScores(getScores()).slice(0, LEADERBOARD_DISPLAY_LIMIT);
   let source = "Local";
   if (getOnlineConfig()) {
     try {
-      scores = sortScores(await fetchOnlineLeaderboard()).slice(0, 10);
+      scores = sortScores(await fetchOnlineLeaderboard()).slice(0, LEADERBOARD_DISPLAY_LIMIT);
       source = "Online";
     } catch (error) {
       console.warn(error);
@@ -742,7 +743,7 @@ async function showLeaderboard() {
   els.leaderboardList.innerHTML = scores.length
     ? scores.map((entry) => `<li>${escapeHtml(entry.player)}<span>${entry.score} pts · L${entry.bestLevel} · ${entry.accuracy}%</span></li>`).join("")
     : "<li>No scores yet<span>Play a run</span></li>";
-  els.leaderboardList.insertAdjacentHTML("afterbegin", `<li class="leaderboard-source">${source}<span>${scores.length ? "Top 10" : ""}</span></li>`);
+  els.leaderboardList.insertAdjacentHTML("afterbegin", `<li class="leaderboard-source">${source}<span>${scores.length ? `Top ${LEADERBOARD_DISPLAY_LIMIT}` : ""}</span></li>`);
 }
 
 async function shareScore() {

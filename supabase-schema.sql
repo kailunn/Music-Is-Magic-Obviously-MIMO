@@ -54,7 +54,8 @@ to anon
 using (true);
 
 drop view if exists public.mimo_leaderboard_top_10;
-create view public.mimo_leaderboard_top_10 as
+drop view if exists public.mimo_leaderboard_top_100;
+create view public.mimo_leaderboard_top_100 as
   select
     rank() over (
       order by score desc, best_level desc, accuracy desc, seconds asc, created_at asc
@@ -68,4 +69,4 @@ create view public.mimo_leaderboard_top_10 as
     created_at
   from public.mimo_scores
   order by score desc, best_level desc, accuracy desc, seconds asc, created_at asc
-  limit 10;
+  limit 100;

@@ -10,9 +10,10 @@ The schema creates:
 
 - `public.mimo_scores` for leaderboard records
 - `public.mimo_sessions` for one-time signed game sessions
-- `public.mimo_leaderboard_top_10` for ranked display
+- `public.mimo_leaderboard_top_100` for ranked display
 
 Only anonymous `SELECT` is enabled on scores. There is no anonymous insert policy.
+The Edge Function keeps only the top 1000 stored scores. The browser displays the top 100.
 
 ## 2. Configure the static site
 
