@@ -351,6 +351,20 @@ function splitAnswerLabel(label) {
   return { main: match[1], notes: match[2] };
 }
 
+function getAnswerDisplay(pattern) {
+  const labelParts = splitAnswerLabel(pattern.label);
+  if (pattern.mode === "sequence" && labelParts.notes) {
+    return {
+      main: labelParts.notes.replace(/^\(|\)$/g, ""),
+      hint: labelParts.main
+    };
+  }
+  return {
+    main: labelParts.main,
+    hint: labelParts.notes || ""
+  };
+}
+
 function getLevel(id = state.level) {
   return LEVELS[id - 1];
 }
@@ -530,13 +544,13 @@ function render() {
     card.className = "answer-card";
     card.type = "button";
     card.dataset.index = index;
-    const labelParts = splitAnswerLabel(option.pattern.label);
-    const labelClass = labelParts.notes ? "answer-label split-label" : "answer-label";
+    const answerDisplay = getAnswerDisplay(option.pattern);
+    const labelClass = answerDisplay.hint ? "answer-label split-label" : "answer-label";
     card.innerHTML = `
       <div class="answer-card-inner">
         <span class="${labelClass}">
-          <span class="answer-main">${escapeHtml(labelParts.main)}</span>
-          ${labelParts.notes ? `<span class="answer-notes">${escapeHtml(labelParts.notes)}</span>` : ""}
+          <span class="answer-main">${escapeHtml(answerDisplay.main)}</span>
+          ${answerDisplay.hint ? `<span class="answer-notes">${escapeHtml(answerDisplay.hint)}</span>` : ""}
         </span>
         <span class="answer-hint">${level.role}</span>
       </div>
@@ -597,7 +611,7 @@ function chooseOption(index) {
     els.animalWalker.classList.add("escaped");
     state.streak = 0;
     els.gameScreen.classList.add("shake");
-    els.promptTitle.innerHTML = `Correct answer: <span class="big-answer">${escapeHtml(state.question.answerPattern.label)}</span>`;
+    els.promptTitle.innerHTML = `Correct answer: <span class="big-answer">${escapeHtml(getAnswerDisplay(state.question.answerPattern).main)}</span>`;
     els.promptText.textContent = "The animal exploded. Listen for the match next time.";
   }
 
