@@ -287,7 +287,9 @@ input {
 }
 
 .pixel-animal.frog,
-.pixel-animal.deer {
+.pixel-animal.deer,
+.pixel-animal.cat,
+.pixel-animal.fox {
   --body: #79b95a;
   --body-dark: #477a38;
   --head: #8ed76a;
@@ -538,7 +540,7 @@ input {
 
 .level-meter {
   display: grid;
-  grid-template-columns: repeat(6, 18px);
+  grid-template-columns: repeat(7, 18px);
   gap: 6px;
 }
 

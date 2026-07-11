@@ -159,8 +159,8 @@ export default {
         if (new Date(sessionRow.expires_at).getTime() < Date.now()) return json(401, { error: "Session expired" });
 
         const name = String(sessionRow.player_name || session.playerName || "").trim().slice(0, 18);
-        const score = clampInt(body?.score, 0, 900);
-        const bestLevel = clampInt(body?.bestLevel, 1, 6);
+        const score = clampInt(body?.score, 0, 980);
+        const bestLevel = clampInt(body?.bestLevel, 1, 7);
         const accuracy = clampInt(body?.accuracy, 0, 100);
         const monstersCaptured = clampInt(body?.monstersCaptured, 0, 20);
         const serverSeconds = Math.max(1, Math.floor((Date.now() - new Date(sessionRow.issued_at).getTime()) / 1000));

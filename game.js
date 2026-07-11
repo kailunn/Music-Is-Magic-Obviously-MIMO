@@ -31,17 +31,11 @@ const LEVELS = [
       { id: "chick", name: "Chick", emoji: "🐤" }
     ],
     patterns: [
-      { label: "Minor 2 (C-Db)", notes: [261.63, 277.18], mode: "sequence" },
       { label: "Major 2 (C-D)", notes: [261.63, 293.66], mode: "sequence" },
-      { label: "Minor 3 (C-Eb)", notes: [261.63, 311.13], mode: "sequence" },
       { label: "Major 3 (C-E)", notes: [261.63, 329.63], mode: "sequence" },
       { label: "Perfect 4 (C-F)", notes: [261.63, 349.23], mode: "sequence" },
-      { label: "Tritone (C-F#)", notes: [261.63, 369.99], mode: "sequence" },
       { label: "Perfect 5 (C-G)", notes: [261.63, 392.0], mode: "sequence" },
-      { label: "Minor 6 (C-Ab)", notes: [261.63, 415.3], mode: "sequence" },
       { label: "Major 6 (C-A)", notes: [261.63, 440.0], mode: "sequence" },
-      { label: "Minor 7 (C-Bb)", notes: [261.63, 466.16], mode: "sequence" },
-      { label: "Major 7 (C-B)", notes: [261.63, 493.88], mode: "sequence" },
       { label: "Octave (C-C)", notes: [261.63, 523.25], mode: "sequence" }
     ]
   },
@@ -56,15 +50,35 @@ const LEVELS = [
     ],
     patterns: [
       { label: "C Major (C-E-G)", notes: [261.63, 329.63, 392.0], mode: "chord" },
-      { label: "A Minor (A-C-E)", notes: [220.0, 261.63, 329.63], mode: "chord" },
       { label: "F Major (F-A-C)", notes: [174.61, 220.0, 261.63], mode: "chord" },
-      { label: "G Major (G-B-D)", notes: [196.0, 246.94, 293.66], mode: "chord" }
+      { label: "G Major (G-B-D)", notes: [196.0, 246.94, 293.66], mode: "chord" },
+      { label: "C Major High (C-E-G)", notes: [523.25, 659.25, 783.99], mode: "chord" }
     ]
   },
   {
     id: 4,
-    name: "Octave Leaps",
+    name: "Chromatic Half Steps",
     points: 40,
+    role: "Close half-step motion",
+    monsters: [
+      { id: "cat", name: "Cat", emoji: "🐱" },
+      { id: "fox", name: "Fox", emoji: "🦊" }
+    ],
+    patterns: [
+      { label: "Minor 2 Up (C-Db)", notes: [261.63, 277.18], mode: "sequence" },
+      { label: "Minor 2 Down (C-B)", notes: [261.63, 246.94], mode: "sequence" },
+      { label: "Natural Half Step (E-F)", notes: [329.63, 349.23], mode: "sequence" },
+      { label: "Natural Half Step (B-C)", notes: [246.94, 261.63], mode: "sequence" },
+      { label: "Chromatic Turn (C-Db-C)", notes: [261.63, 277.18, 261.63], mode: "sequence" },
+      { label: "Sharp Neighbor (G-G#-G)", notes: [392.0, 415.3, 392.0], mode: "sequence" },
+      { label: "Flat Neighbor (A-Ab-A)", notes: [440.0, 415.3, 440.0], mode: "sequence" },
+      { label: "Tritone (C-F#)", notes: [261.63, 369.99], mode: "sequence" }
+    ]
+  },
+  {
+    id: 5,
+    name: "Octave Leaps",
+    points: 50,
     role: "Wide melodic jumps",
     monsters: [
       { id: "eagle", name: "Eagle", emoji: "🦅" },
@@ -86,9 +100,9 @@ const LEVELS = [
     ]
   },
   {
-    id: 5,
+    id: 6,
     name: "Dissonant Chords",
-    points: 50,
+    points: 60,
     role: "Unstable clusters",
     monsters: [
       { id: "ogre", name: "Mischief", emoji: "👹" },
@@ -102,9 +116,9 @@ const LEVELS = [
     ]
   },
   {
-    id: 6,
+    id: 7,
     name: "Advanced Chords",
-    points: 60,
+    points: 70,
     role: "Extended chord colors",
     monsters: [
       { id: "crystal", name: "Crystal", emoji: "🔷" },
@@ -694,28 +708,17 @@ async function showLeaderboard() {
 
 async function shareScore() {
   const gameUrl = `${window.location.origin}${window.location.pathname}`;
-  const text = `${state.player} scored ${state.score} points in Melody Hunters. Can you beat it?`;
-  const shareData = {
-    title: "Melody Hunters",
-    text,
-    url: gameUrl
-  };
+  const text = `${state.player} scored ${state.score} points in Melody Hunters. Can you beat it?\n${gameUrl}`;
 
   try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-      return;
-    }
-    await navigator.clipboard.writeText(`${text} ${gameUrl}`);
+    await navigator.clipboard.writeText(text);
     const originalText = els.shareButton.textContent;
     els.shareButton.textContent = "Copied";
     window.setTimeout(() => {
       els.shareButton.textContent = originalText;
     }, 1400);
   } catch (error) {
-    if (error?.name !== "AbortError") {
-      console.warn(error);
-    }
+    console.warn(error);
   }
 }
 

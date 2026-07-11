@@ -9,8 +9,8 @@ create table if not exists public.mimo_scores (
   seconds integer not null,
   created_at timestamptz not null default now(),
 
-  constraint mimo_score_valid check (score >= 0 and score <= 900),
-  constraint mimo_best_level_valid check (best_level >= 1 and best_level <= 6),
+  constraint mimo_score_valid check (score >= 0 and score <= 980),
+  constraint mimo_best_level_valid check (best_level >= 1 and best_level <= 7),
   constraint mimo_accuracy_valid check (accuracy >= 0 and accuracy <= 100),
   constraint mimo_monsters_valid check (monsters_captured >= 0 and monsters_captured <= 20),
   constraint mimo_seconds_valid check (seconds >= 1 and seconds <= 3600)
@@ -38,13 +38,13 @@ alter table public.mimo_scores
   drop constraint if exists mimo_score_valid;
 
 alter table public.mimo_scores
-  add constraint mimo_score_valid check (score >= 0 and score <= 900);
+  add constraint mimo_score_valid check (score >= 0 and score <= 980);
 
 alter table public.mimo_scores
   drop constraint if exists mimo_best_level_valid;
 
 alter table public.mimo_scores
-  add constraint mimo_best_level_valid check (best_level >= 1 and best_level <= 6);
+  add constraint mimo_best_level_valid check (best_level >= 1 and best_level <= 7);
 
 drop policy if exists "public can read mimo scores" on public.mimo_scores;
 create policy "public can read mimo scores"
