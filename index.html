@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Melody Hunters</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section id="startScreen" class="screen start-screen">
+        <div class="brand">
+          <span class="brand-mark">♪</span>
+          <div>
+            <h1>Melody Hunters</h1>
+            <p>Catch musical monsters by naming what you hear.</p>
+          </div>
+        </div>
+
+        <div class="intro-grid">
+          <div class="glass-panel intro-panel">
+            <h2>20 quick rounds</h2>
+            <p>Listen to each melody, then choose the matching English music label.</p>
+          </div>
+          <div class="glass-panel intro-panel">
+            <h2>Adaptive difficulty</h2>
+            <p>Two correct answers raise the level. One miss brings it down.</p>
+          </div>
+          <div class="glass-panel intro-panel">
+            <h2>Build your team</h2>
+            <p>Every correct answer captures a monster for your run.</p>
+          </div>
+        </div>
+
+        <div class="start-actions">
+          <input id="playerName" maxlength="18" placeholder="Hunter name" autocomplete="off">
+          <button id="startButton" class="primary-button">Start Hunt</button>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen hidden" aria-live="polite">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Melody Hunters</span>
+            <h2 id="levelTitle">Level 1: Single Notes</h2>
+          </div>
+          <button id="soundToggle" class="icon-button" aria-label="Toggle sound" title="Toggle sound">🔊</button>
+        </header>
+
+        <section class="status-grid">
+          <div class="glass-panel stat">
+            <span>Round</span>
+            <strong id="roundStat">1 / 20</strong>
+          </div>
+          <div class="glass-panel stat">
+            <span>Score</span>
+            <strong id="scoreStat">0</strong>
+          </div>
+          <div class="glass-panel stat">
+            <span>Streak</span>
+            <strong id="streakStat">0</strong>
+          </div>
+          <div class="glass-panel stat">
+            <span>Accuracy</span>
+            <strong id="accuracyStat">0%</strong>
+          </div>
+        </section>
+
+        <section id="playPanel" class="glass-panel play-panel">
+          <div class="animal-stage">
+            <div id="pulse" class="pulse"></div>
+            <div id="animalWalker" class="animal-walker">
+              <div id="animalSprite" class="pixel-animal butterfly" aria-hidden="true">
+                <span class="pixel-head"></span>
+                <span class="pixel-body"></span>
+                <span class="pixel-tail"></span>
+                <span class="pixel-leg leg-a"></span>
+                <span class="pixel-leg leg-b"></span>
+                <span class="pixel-leg leg-c"></span>
+                <span class="pixel-leg leg-d"></span>
+              </div>
+            </div>
+          </div>
+          <div class="play-copy">
+            <h3 id="promptTitle">Listen closely</h3>
+            <p id="promptText">Choose the matching note, interval, or chord name.</p>
+          </div>
+          <button id="replayButton" class="replay-button" aria-label="Replay sound" title="Replay sound">🔊</button>
+        </section>
+
+        <section class="choices" id="choices"></section>
+
+        <section class="team-row glass-panel">
+          <div>
+            <span class="eyebrow">Captured team</span>
+            <div id="teamList" class="team-list">No monsters yet</div>
+          </div>
+          <div class="level-meter" aria-label="Current level">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </section>
+      </section>
+
+      <section id="endScreen" class="screen end-screen hidden">
+        <div class="glass-panel result-panel">
+          <span class="result-badge">Hunt complete</span>
+          <h2 id="resultTitle">Great run</h2>
+          <div class="result-grid">
+            <div><span>Final score</span><strong id="finalScore">0</strong></div>
+            <div><span>Best level</span><strong id="bestLevel">1</strong></div>
+            <div><span>Accuracy</span><strong id="finalAccuracy">0%</strong></div>
+            <div><span>Captured</span><strong id="capturedCount">0</strong></div>
+          </div>
+          <div id="collection" class="collection"></div>
+          <div class="end-actions">
+            <button id="againButton" class="primary-button">Play Again</button>
+            <button id="leaderboardButton" class="secondary-button">Leaderboard</button>
+          </div>
+        </div>
+      </section>
+
+      <dialog id="leaderboardDialog">
+        <div class="dialog-head">
+          <h2>Leaderboard</h2>
+          <button id="closeLeaderboard" class="icon-button" aria-label="Close leaderboard" title="Close">×</button>
+        </div>
+        <ol id="leaderboardList" class="leaderboard-list"></ol>
+      </dialog>
+    </main>
+    <script src="game.js"></script>
+  </body>
+</html>
