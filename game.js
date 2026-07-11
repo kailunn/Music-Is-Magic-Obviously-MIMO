@@ -115,6 +115,7 @@ const els = {
   resultTitle: document.querySelector("#resultTitle"),
   collection: document.querySelector("#collection"),
   againButton: document.querySelector("#againButton"),
+  shareButton: document.querySelector("#shareButton"),
   leaderboardButton: document.querySelector("#leaderboardButton"),
   leaderboardDialog: document.querySelector("#leaderboardDialog"),
   closeLeaderboard: document.querySelector("#closeLeaderboard"),
@@ -648,11 +649,39 @@ async function showLeaderboard() {
   els.leaderboardList.insertAdjacentHTML("afterbegin", `<li class="leaderboard-source">${source}<span>${scores.length ? "Top 10" : ""}</span></li>`);
 }
 
+async function shareScore() {
+  const gameUrl = `${window.location.origin}${window.location.pathname}`;
+  const text = `${state.player} scored ${state.score} points in Melody Hunters. Can you beat it?`;
+  const shareData = {
+    title: "Melody Hunters",
+    text,
+    url: gameUrl
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+    await navigator.clipboard.writeText(`${text} ${gameUrl}`);
+    const originalText = els.shareButton.textContent;
+    els.shareButton.textContent = "Copied";
+    window.setTimeout(() => {
+      els.shareButton.textContent = originalText;
+    }, 1400);
+  } catch (error) {
+    if (error?.name !== "AbortError") {
+      console.warn(error);
+    }
+  }
+}
+
 els.startButton.addEventListener("click", startGame);
 if (els.startLeaderboardButton) {
   els.startLeaderboardButton.addEventListener("click", showLeaderboard);
 }
 els.againButton.addEventListener("click", startGame);
+els.shareButton.addEventListener("click", shareScore);
 els.replayButton.addEventListener("click", () => {
   if (state.question) playPattern(state.question.answerPattern);
 });
