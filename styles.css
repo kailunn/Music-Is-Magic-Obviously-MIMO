@@ -313,7 +313,9 @@ input {
 
 .pixel-animal.eagle,
 .pixel-animal.ogre,
-.pixel-animal.twister {
+.pixel-animal.twister,
+.pixel-animal.crystal,
+.pixel-animal.echo {
   --body: #8d91a8;
   --body-dark: #4c526d;
   --head: #aeb4cc;
@@ -536,7 +538,7 @@ input {
 
 .level-meter {
   display: grid;
-  grid-template-columns: repeat(5, 18px);
+  grid-template-columns: repeat(6, 18px);
   gap: 6px;
 }
 

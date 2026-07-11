@@ -100,6 +100,33 @@ const LEVELS = [
       { label: "Sharp Clash (E-F-G#)", notes: [329.63, 349.23, 415.3], mode: "chord" },
       { label: "Low Rumble (C-C#-G)", notes: [130.81, 138.59, 196.0], mode: "chord" }
     ]
+  },
+  {
+    id: 6,
+    name: "Advanced Chords",
+    points: 60,
+    role: "Extended chord colors",
+    monsters: [
+      { id: "crystal", name: "Crystal", emoji: "🔷" },
+      { id: "echo", name: "Echo", emoji: "✨" }
+    ],
+    patterns: [
+      { label: "C Minor (C-Eb-G)", notes: [261.63, 311.13, 392.0], mode: "chord" },
+      { label: "C Minor 1st Inv (Eb-G-C)", notes: [311.13, 392.0, 523.25], mode: "chord" },
+      { label: "C Minor 2nd Inv (G-C-Eb)", notes: [196.0, 261.63, 311.13], mode: "chord" },
+      { label: "C Diminished (C-Eb-Gb)", notes: [261.63, 311.13, 369.99], mode: "chord" },
+      { label: "C Dim 1st Inv (Eb-Gb-C)", notes: [311.13, 369.99, 523.25], mode: "chord" },
+      { label: "C Dim 2nd Inv (Gb-C-Eb)", notes: [184.99, 261.63, 311.13], mode: "chord" },
+      { label: "C Augmented (C-E-G#)", notes: [261.63, 329.63, 415.3], mode: "chord" },
+      { label: "C Aug 1st Inv (E-G#-C)", notes: [329.63, 415.3, 523.25], mode: "chord" },
+      { label: "C Aug 2nd Inv (G#-C-E)", notes: [207.65, 261.63, 329.63], mode: "chord" },
+      { label: "C Sus2 (C-D-G)", notes: [261.63, 293.66, 392.0], mode: "chord" },
+      { label: "C Sus2 1st Inv (D-G-C)", notes: [293.66, 392.0, 523.25], mode: "chord" },
+      { label: "C Sus4 (C-F-G)", notes: [261.63, 349.23, 392.0], mode: "chord" },
+      { label: "C Sus4 1st Inv (F-G-C)", notes: [349.23, 392.0, 523.25], mode: "chord" },
+      { label: "C Major 1st Inv (E-G-C)", notes: [329.63, 392.0, 523.25], mode: "chord" },
+      { label: "C Major 2nd Inv (G-C-E)", notes: [196.0, 261.63, 329.63], mode: "chord" }
+    ]
   }
 ];
 
@@ -530,7 +557,7 @@ function chooseOption(index) {
 
 function advance(wasCorrect) {
   if (wasCorrect && state.streak >= 2) {
-    state.level = Math.min(5, state.level + 1);
+    state.level = Math.min(LEVELS.length, state.level + 1);
     state.streak = 0;
   } else if (!wasCorrect) {
     state.level = Math.max(1, state.level - 1);
