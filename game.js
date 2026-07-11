@@ -649,7 +649,9 @@ async function showLeaderboard() {
 }
 
 els.startButton.addEventListener("click", startGame);
-els.startLeaderboardButton.addEventListener("click", showLeaderboard);
+if (els.startLeaderboardButton) {
+  els.startLeaderboardButton.addEventListener("click", showLeaderboard);
+}
 els.againButton.addEventListener("click", startGame);
 els.replayButton.addEventListener("click", () => {
   if (state.question) playPattern(state.question.answerPattern);
